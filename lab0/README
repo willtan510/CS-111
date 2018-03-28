@@ -1,0 +1,18 @@
+NAME: William Tan
+EMAIL: willtan510@gmail.com
+ID: 104770108
+
+Lab0.c 
+This file had the code that allowed for file descriptor manipulation across the standard input and standard output, allowing for different options to be specified as well. These options were --input,--output,--segfault,and --catch. 
+
+Makefile
+This file contains the command line arguments such that the appropriate project files could be compiled, archived into a tar file, and tested for multiple smoke-test cases.
+
+backtrace.png
+This was the screenshot of the gdb interface as the segfault was hit, showing the associated stack-trace
+
+breakpoint.png
+This was the screenshot of the gdb interface when the break reached the breakpoint of the pointer that was initialized to be null. The inspection of the value of this pointer depicted that the address could not be accessed.
+
+Smoke-test cases:
+Each case was geared to target each exit code as well as target diverse ways of potentially not hitting the exit code. The input-output being equivalent was also tested to ensure there was no problem with the file redirection.

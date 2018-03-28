@@ -1,0 +1,22 @@
+NAME: William Tan
+EMAIL: willtan510@gmail.com
+ID: 104770108
+
+Serial Number: BBGW16062679
+Wifi: UCLA_WIFI_RES
+
+my_beaglebone.jpg
+Me holding the Beaglebone
+
+connected.png
+Screenshot showing connection to wifi from USB terminal command session with name
+
+copy.png
+Screenshot by which I copy the hello.c program to the Beaglebone through Filezilla sftp
+
+build_run.png
+Screenshot with hello world program run from wifi SSH session
+
+git.png
+Screenshot from WIFI ssh session where a repo is cloned
+

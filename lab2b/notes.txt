@@ -1,0 +1,5 @@
+enter tar ball of gperftools to install (get from github)
+
+lab2b_2.png
+wait for lock time greater because its the summation of the threads' waiting time
+

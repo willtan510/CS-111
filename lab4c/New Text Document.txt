@@ -1,0 +1,5 @@
+take project 1 and modify
+host should = ip of the server (hostname lever.cs.cual.edu, map the hostname to the ip)
+use gethostbyname (if you pass in address or a hostname you get an ip address)
+
+getopt_long reorders things not with a --option to the end of the array after the parameters with the prefix

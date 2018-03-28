@@ -1,0 +1,40 @@
+NAME: William Tan
+EMAIL: willtan510@gmail.com
+ID: 104770108
+
+lab2_add.c
+Source code that implements an add function upon a shared variable with different command line options to specify synchronization methods and yielding.
+
+SortedList.h Sortedlist.c lab2_list.c
+These files specify the necessary functions and code to manipulate a shared linked list according to different command line options that specify synchronization methods for threads and yielding.
+
+lab2_add.csv lab2_list.csv
+Contains the data that will be used to generate the graphs
+
+Makefile
+Builds the programs, creates the csv files with the tests, graphs the plots from the csv files, and delets programs and output created by this file.
+
+*.png
+Graphs generated with data reduction scripts to display different results 
+
+README
+This file describing the files above and answering questions asked on the project spec.
+
+ANSWERS TO THE QUESTIONS
+2.1.1
+It takes so many iterations before errors are seen because threads conflicting each other is actually rare because it must be extremely coincidental to have a thread to enter a critical section at the same time another thread is inside. However, with many iterations, the chance of at least 1 error is seen is greatly increased. A smaller number of iterations seldom fails due to the principle behind the answer above. With low iterations, the extremely small chance of 2 threads entering a critical section concurrently is not amplified. 
+
+2.1.2
+The yields are so much slower because whenever the yield function is called, the thread's runtime is interrupted and gives another thread the CPU. This action necessitates a context switch every yield such that there is high overhead. The additional time is going towards these context switches. We cannot get the valid per-operation timings with the yield functions because the time spent doing context switches is included into the runtime.
+
+2.1.3
+The average cost per operation drops with increasing iterations because there is a large initial cost to initialize and set up the threads. This cost is offsetted/averaged out as there are more tasks to complete, such as with increasing iterations. The correct cost is the limit as iterations goes higher and higher towards infinity. This is because the cost for the initial overhead is a one time cost that does not depend on the iterations going up. This means that cost will be almost completely offset as iterations approaches infinity.
+
+2.1.4
+All the options perform similarly for low numbers of threads because there is less competition for the CPU when there are lower numbers of threads. Each thread does not have to wait too long to get control of the CPU again.  As the number of threads rises though, the 3 protected operations slow down because they have additional locks/checks to run to make sure that no other thread enters the critical section as they are in there. Threads waste CPU and time by being blocked and having to check when they can get access to the CPU again, with the effect being more drastic as threads increase.
+
+2.2.1
+For both plots depicting operation cost of mutex-protected operations vs threads, the cost increases as the thread number increases as expected. The curve for the add graph has a curve that starts out high and increasing but then begins flattens out as there are more threads. This is due to the initial cost in overhead that is not affected by variable number of threads with the mutex. The flattening is due to the less costly instruction in the add as well as the nature of mutex locks: the threads without the lock go to sleep so that there's less wasted CPU compared to spinning. The list graph depicts the cost as linear sloping upwards as the threads increase. Due to the log scale however, we can tell the cost from each jump in number of threads is quite high. The linear nature in this log graph is a result of the costly operations in dealing with the linked list.
+
+2.2.2
+For the spin-lock cost for the add graph, there is a significant initial jump in cost from thread 1 to 2. After this however, there seems to be a linear increase the number of threads increase. This shape is due to there existing essentially no extra cost due to spin-lock when there is 1 thread, but the spin-lock cost when there is another thread added is greater than x10 a jump in cost. The cost keeps increasing after that because as more threads are in the program, there are more time slices devoted towards just spinning now, greatly increasing the cost with a large number of threads. For the list, the spin lock cost increases linearly as the threads go up as well but without the initial big jump the add graph had. This shape is caused by the same reason the mentioned earlier with the time slice wasting. These graphs increase at such a high rate because the threads use up their entire run time on just spinning when they could have gave up their time slice preemptively and thus been better with scale.

@@ -1,0 +1,15 @@
+NAME: William Tan
+EMAIL: willtan510@gmail.com
+ID: 104770108
+
+lab4c_tcp.c
+C source file that connects to a tcp server in order to feed commands to a beaglebone that is recording temperature. The host is specified with a command line option in addition to the port being specified but without an option.
+
+lab4c_tls.c 
+C source file that connects to a server but operates under a TLS connection through a specified address and port. This is achieved through the openssl header file and functions that allow connection through tls.
+
+Makefile
+Builds the executable and tar file as well as cleans the directory of the generated files.
+
+README
+This file which describes the source files and files used to generate the tar file.

@@ -1,0 +1,424 @@
+Total: 439 samples
+     332  75.6%  75.6%      439 100.0% threadList
+      75  17.1%  92.7%       75  17.1% __strcmp_sse42
+      17   3.9%  96.6%       57  13.0% SortedList_lookup
+      10   2.3%  98.9%       50  11.4% SortedList_insert
+       5   1.1% 100.0%        5   1.1% _init
+       0   0.0% 100.0%      439 100.0% __clone
+       0   0.0% 100.0%      439 100.0% start_thread
+ROUTINE ====================== threadList in /u/cs/ugrad/tanw/cs111/lab2b/lab2_list.c
+   332    439 Total samples (flat / cumulative)
+     .      .   27: pthread_mutex_t* mutexLocks;
+     .      .   28: int lenSpinLock;
+     .      .   29: pthread_mutex_t lenMutexLock;
+     .      .   30: 
+     .      .   31: void *threadList(void* index)
+---
+     .      .   32: {
+     .      .   33:   struct timespec start_time1,end_time1;
+     .      .   34:   int listLen=0;
+     .      .   35:   int indice=*((int *)index);
+     .      .   36:   long long threadTime=0;
+     .      .   37:   for (int i=indice;i<numElements;i+=numThreads)
+     .      .   38:   {
+     .      .   39:     if(typeM)
+     .      .   40:     {
+     .      .   41:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .   42:       
+     .      .   43:       pthread_mutex_lock(&mutexLocks[eBelongsIn[i]]);
+     .      .   44:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   45:       SortedList_insert(&lists[eBelongsIn[i]],&elements[i]);
+     .      .   46:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .   47:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .   48:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .   49:       threadTime+=elapsed_ns1;
+     .      .   50:       pthread_mutex_unlock(&mutexLocks[eBelongsIn[i]]);
+     .      .   51:       
+     .      .   52:     }
+     .      .   53:     else if(typeS)
+     .      .   54:     {
+     .      .   55:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+   255    255   56:       while(__sync_lock_test_and_set(&spinLocks[eBelongsIn[i]],1));
+     .      .   57:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   58:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .   59:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .   60:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .   61:       threadTime+=elapsed_ns1;
+     .     50   62:       SortedList_insert(&lists[eBelongsIn[i]],&elements[i]);
+     .      .   63:       __sync_lock_release(&spinLocks[eBelongsIn[i]]);
+     .      .   64:     }
+     .      .   65:     else
+     .      .   66:     {
+     .      .   67:       SortedList_insert(&lists[eBelongsIn[i]],&elements[i]);
+     .      .   68:     }
+     .      .   69:   }
+     .      .   70:   
+     .      .   71:   if(typeM)
+     .      .   72:   {
+     .      .   73:     for(int i=0;i<numLists;i++)
+     .      .   74:     {
+     .      .   75:         int temp=0;
+     .      .   76:         clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .   77:         
+     .      .   78:         pthread_mutex_lock(&mutexLocks[i]);
+     .      .   79:         
+     .      .   80:         clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   81:         long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .   82:         elapsed_ns1+=end_time1.tv_nsec;
+     .      .   83:         elapsed_ns1-=start_time1.tv_nsec;
+     .      .   84:         threadTime+=elapsed_ns1;
+     .      .   85:         
+     .      .   86:         temp=SortedList_length(&lists[i]);
+     .      .   87:         pthread_mutex_unlock(&mutexLocks[i]);
+     .      .   88:   
+     .      .   89:         if(temp==-1)
+     .      .   90:         {
+     .      .   91:           fprintf(stderr,"Corrupted List: Error during attempt to get length\n");
+     .      .   92:           exit(2);
+     .      .   93:         }
+     .      .   94:         clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .   95:         
+     .      .   96:         pthread_mutex_lock(&lenMutexLock);
+     .      .   97:         
+     .      .   98:         clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   99:         elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  100:         elapsed_ns1+=end_time1.tv_nsec;
+     .      .  101:         elapsed_ns1-=start_time1.tv_nsec;
+     .      .  102:         threadTime+=elapsed_ns1;
+     .      .  103:         
+     .      .  104:         listLen+=temp;
+     .      .  105:         pthread_mutex_unlock(&lenMutexLock);
+     .      .  106:     }
+     .      .  107:     
+     .      .  108: 
+     .      .  109:   }
+     .      .  110:   else if(typeS)
+     .      .  111:   {
+     .      .  112:     listLen=SortedList_length(lists);
+     .      .  113: 
+     .      .  114:     for(int i=0;i<numLists;i++)
+     .      .  115:     {
+     .      .  116:       int temp=0;
+     .      .  117:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     1      1  118:       while(__sync_lock_test_and_set(&spinLocks[i],1));
+     .      .  119:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  120:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  121:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  122:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  123:       threadTime+=elapsed_ns1;
+     .      .  124:       
+     .      .  125:       temp=SortedList_length(&lists[i]);
+     .      .  126:       __sync_lock_release(&spinLocks[i]);
+     .      .  127:       if(temp==-1)
+     .      .  128:       {
+     .      .  129:         fprintf(stderr,"Corrupted List: Error during attempt to get length\n");
+     .      .  130:         exit(2);
+     .      .  131:       }
+     .      .  132:       
+     .      .  133:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .  134:         
+     .      .  135:       while(__sync_lock_test_and_set(&lenSpinLock,1));
+     .      .  136:         
+     .      .  137:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  138:       elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  139:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  140:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  141:       threadTime+=elapsed_ns1;
+     .      .  142:         
+     .      .  143:       listLen+=temp;
+     .      .  144:       __sync_lock_release(&lenSpinLock);   
+     .      .  145:       
+     .      .  146:     }
+     .      .  147:   }
+     .      .  148:   else
+     .      .  149:   {
+     .      .  150:       for(int i=0;i<numLists;i++)
+     .      .  151:       {
+     .      .  152:         int temp=0;
+     .      .  153:         temp=SortedList_length(&lists[i]);
+     .      .  154:         if(temp==-1)
+     .      .  155:         {
+     .      .  156:           fprintf(stderr,"Corrupted List: Error during attempt to get length\n");
+     .      .  157:           exit(2);
+     .      .  158:         }
+     .      .  159:         listLen+=temp;
+     .      .  160:       }
+     .      .  161:   }
+     .      .  162:   
+     .      .  163:   for(int i=indice;i<numElements;i+=numThreads)
+     .      .  164:   {
+     .      .  165:     if(typeM)
+     .      .  166:     {
+     .      .  167:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .  168:       pthread_mutex_lock(&mutexLocks[eBelongsIn[i]]);
+     .      .  169:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  170:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  171:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  172:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  173:       threadTime+=elapsed_ns1;
+     .      .  174:       SortedListElement_t* temp=SortedList_lookup(&lists[eBelongsIn[i]],elements[i].key);
+     .      .  175:       if(temp==NULL)
+     .      .  176:       {
+     .      .  177:         fprintf(stderr,"Corrupted List: Error searching for inserted element\n");
+     .      .  178:         exit(2);
+     .      .  179:       }
+     .      .  180:         if(SortedList_delete(temp)==1)
+     .      .  181:         {
+     .      .  182:           fprintf(stderr,"Corrupted List: Error deleting inserted element \n");
+     .      .  183:           exit(2);
+     .      .  184:         }
+     .      .  185:       pthread_mutex_unlock(&mutexLocks[eBelongsIn[i]]);
+     .      .  186:     }
+     .      .  187:     else if(typeS)
+     .      .  188:     {
+     .      .  189:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+    76     76  190:       while(__sync_lock_test_and_set(&spinLocks[eBelongsIn[i]],1));
+     .      .  191:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  192:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  193:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  194:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  195:       threadTime+=elapsed_ns1;
+     .     57  196:       SortedListElement_t* temp=SortedList_lookup(&lists[eBelongsIn[i]],elements[i].key);
+     .      .  197:       if(temp==NULL)
+     .      .  198:       {
+     .      .  199:         fprintf(stderr,"Corrupted List: Error searching for inserted element\n");
+     .      .  200:         exit(2);
+     .      .  201:       }
+     .      .  202:       if(SortedList_delete(temp)==1)
+     .      .  203:       {
+     .      .  204:         fprintf(stderr,"Corrupted List: Error deleting inserted element \n");
+     .      .  205:         exit(2);
+     .      .  206:       }
+     .      .  207:       __sync_lock_release(&spinLocks[eBelongsIn[i]]);
+     .      .  208:     }
+     .      .  209:     else
+     .      .  210:     {
+     .      .  211:       SortedListElement_t* temp=SortedList_lookup(&lists[eBelongsIn[i]],elements[i].key);
+     .      .  212:       if(temp==NULL)
+     .      .  213:       {
+     .      .  214:         fprintf(stderr,"Corrupted List: Error searching for inserted element\n");
+     .      .  215:         exit(2);
+     .      .  216:       }
+     .      .  217:       if(SortedList_delete(temp)==1)
+     .      .  218:       {
+     .      .  219:         fprintf(stderr,"Corrupted List: Error deleting inserted element \n");
+     .      .  220:         exit(2);
+     .      .  221:       }
+     .      .  222:     }
+     .      .  223:   }
+     .      .  224:   return (void *)threadTime;
+     .      .  225: }
+---
+     .      .  226: 
+     .      .  227: void changeString()
+     .      .  228: {
+     .      .  229:   strcat(listString,"list-");
+     .      .  230:   if(opt_yield)
+ROUTINE ====================== threadList in /u/cs/ugrad/tanw/cs111/lab2b/lab2_list.c
+   332    439 Total samples (flat / cumulative)
+     .      .   27: pthread_mutex_t* mutexLocks;
+     .      .   28: int lenSpinLock;
+     .      .   29: pthread_mutex_t lenMutexLock;
+     .      .   30: 
+     .      .   31: void *threadList(void* index)
+---
+     .      .   32: {
+     .      .   33:   struct timespec start_time1,end_time1;
+     .      .   34:   int listLen=0;
+     .      .   35:   int indice=*((int *)index);
+     .      .   36:   long long threadTime=0;
+     .      .   37:   for (int i=indice;i<numElements;i+=numThreads)
+     .      .   38:   {
+     .      .   39:     if(typeM)
+     .      .   40:     {
+     .      .   41:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .   42:       
+     .      .   43:       pthread_mutex_lock(&mutexLocks[eBelongsIn[i]]);
+     .      .   44:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   45:       SortedList_insert(&lists[eBelongsIn[i]],&elements[i]);
+     .      .   46:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .   47:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .   48:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .   49:       threadTime+=elapsed_ns1;
+     .      .   50:       pthread_mutex_unlock(&mutexLocks[eBelongsIn[i]]);
+     .      .   51:       
+     .      .   52:     }
+     .      .   53:     else if(typeS)
+     .      .   54:     {
+     .      .   55:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+   255    255   56:       while(__sync_lock_test_and_set(&spinLocks[eBelongsIn[i]],1));
+     .      .   57:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   58:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .   59:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .   60:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .   61:       threadTime+=elapsed_ns1;
+     .     50   62:       SortedList_insert(&lists[eBelongsIn[i]],&elements[i]);
+     .      .   63:       __sync_lock_release(&spinLocks[eBelongsIn[i]]);
+     .      .   64:     }
+     .      .   65:     else
+     .      .   66:     {
+     .      .   67:       SortedList_insert(&lists[eBelongsIn[i]],&elements[i]);
+     .      .   68:     }
+     .      .   69:   }
+     .      .   70:   
+     .      .   71:   if(typeM)
+     .      .   72:   {
+     .      .   73:     for(int i=0;i<numLists;i++)
+     .      .   74:     {
+     .      .   75:         int temp=0;
+     .      .   76:         clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .   77:         
+     .      .   78:         pthread_mutex_lock(&mutexLocks[i]);
+     .      .   79:         
+     .      .   80:         clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   81:         long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .   82:         elapsed_ns1+=end_time1.tv_nsec;
+     .      .   83:         elapsed_ns1-=start_time1.tv_nsec;
+     .      .   84:         threadTime+=elapsed_ns1;
+     .      .   85:         
+     .      .   86:         temp=SortedList_length(&lists[i]);
+     .      .   87:         pthread_mutex_unlock(&mutexLocks[i]);
+     .      .   88:   
+     .      .   89:         if(temp==-1)
+     .      .   90:         {
+     .      .   91:           fprintf(stderr,"Corrupted List: Error during attempt to get length\n");
+     .      .   92:           exit(2);
+     .      .   93:         }
+     .      .   94:         clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .   95:         
+     .      .   96:         pthread_mutex_lock(&lenMutexLock);
+     .      .   97:         
+     .      .   98:         clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .   99:         elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  100:         elapsed_ns1+=end_time1.tv_nsec;
+     .      .  101:         elapsed_ns1-=start_time1.tv_nsec;
+     .      .  102:         threadTime+=elapsed_ns1;
+     .      .  103:         
+     .      .  104:         listLen+=temp;
+     .      .  105:         pthread_mutex_unlock(&lenMutexLock);
+     .      .  106:     }
+     .      .  107:     
+     .      .  108: 
+     .      .  109:   }
+     .      .  110:   else if(typeS)
+     .      .  111:   {
+     .      .  112:     listLen=SortedList_length(lists);
+     .      .  113: 
+     .      .  114:     for(int i=0;i<numLists;i++)
+     .      .  115:     {
+     .      .  116:       int temp=0;
+     .      .  117:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     1      1  118:       while(__sync_lock_test_and_set(&spinLocks[i],1));
+     .      .  119:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  120:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  121:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  122:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  123:       threadTime+=elapsed_ns1;
+     .      .  124:       
+     .      .  125:       temp=SortedList_length(&lists[i]);
+     .      .  126:       __sync_lock_release(&spinLocks[i]);
+     .      .  127:       if(temp==-1)
+     .      .  128:       {
+     .      .  129:         fprintf(stderr,"Corrupted List: Error during attempt to get length\n");
+     .      .  130:         exit(2);
+     .      .  131:       }
+     .      .  132:       
+     .      .  133:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .  134:         
+     .      .  135:       while(__sync_lock_test_and_set(&lenSpinLock,1));
+     .      .  136:         
+     .      .  137:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  138:       elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  139:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  140:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  141:       threadTime+=elapsed_ns1;
+     .      .  142:         
+     .      .  143:       listLen+=temp;
+     .      .  144:       __sync_lock_release(&lenSpinLock);   
+     .      .  145:       
+     .      .  146:     }
+     .      .  147:   }
+     .      .  148:   else
+     .      .  149:   {
+     .      .  150:       for(int i=0;i<numLists;i++)
+     .      .  151:       {
+     .      .  152:         int temp=0;
+     .      .  153:         temp=SortedList_length(&lists[i]);
+     .      .  154:         if(temp==-1)
+     .      .  155:         {
+     .      .  156:           fprintf(stderr,"Corrupted List: Error during attempt to get length\n");
+     .      .  157:           exit(2);
+     .      .  158:         }
+     .      .  159:         listLen+=temp;
+     .      .  160:       }
+     .      .  161:   }
+     .      .  162:   
+     .      .  163:   for(int i=indice;i<numElements;i+=numThreads)
+     .      .  164:   {
+     .      .  165:     if(typeM)
+     .      .  166:     {
+     .      .  167:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+     .      .  168:       pthread_mutex_lock(&mutexLocks[eBelongsIn[i]]);
+     .      .  169:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  170:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  171:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  172:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  173:       threadTime+=elapsed_ns1;
+     .      .  174:       SortedListElement_t* temp=SortedList_lookup(&lists[eBelongsIn[i]],elements[i].key);
+     .      .  175:       if(temp==NULL)
+     .      .  176:       {
+     .      .  177:         fprintf(stderr,"Corrupted List: Error searching for inserted element\n");
+     .      .  178:         exit(2);
+     .      .  179:       }
+     .      .  180:         if(SortedList_delete(temp)==1)
+     .      .  181:         {
+     .      .  182:           fprintf(stderr,"Corrupted List: Error deleting inserted element \n");
+     .      .  183:           exit(2);
+     .      .  184:         }
+     .      .  185:       pthread_mutex_unlock(&mutexLocks[eBelongsIn[i]]);
+     .      .  186:     }
+     .      .  187:     else if(typeS)
+     .      .  188:     {
+     .      .  189:       clock_gettime(CLOCK_MONOTONIC,&start_time1);
+    76     76  190:       while(__sync_lock_test_and_set(&spinLocks[eBelongsIn[i]],1));
+     .      .  191:       clock_gettime(CLOCK_MONOTONIC, &end_time1);
+     .      .  192:       long long elapsed_ns1=(end_time1.tv_sec-start_time1.tv_sec)*1000000000;
+     .      .  193:       elapsed_ns1+=end_time1.tv_nsec;
+     .      .  194:       elapsed_ns1-=start_time1.tv_nsec;
+     .      .  195:       threadTime+=elapsed_ns1;
+     .     57  196:       SortedListElement_t* temp=SortedList_lookup(&lists[eBelongsIn[i]],elements[i].key);
+     .      .  197:       if(temp==NULL)
+     .      .  198:       {
+     .      .  199:         fprintf(stderr,"Corrupted List: Error searching for inserted element\n");
+     .      .  200:         exit(2);
+     .      .  201:       }
+     .      .  202:       if(SortedList_delete(temp)==1)
+     .      .  203:       {
+     .      .  204:         fprintf(stderr,"Corrupted List: Error deleting inserted element \n");
+     .      .  205:         exit(2);
+     .      .  206:       }
+     .      .  207:       __sync_lock_release(&spinLocks[eBelongsIn[i]]);
+     .      .  208:     }
+     .      .  209:     else
+     .      .  210:     {
+     .      .  211:       SortedListElement_t* temp=SortedList_lookup(&lists[eBelongsIn[i]],elements[i].key);
+     .      .  212:       if(temp==NULL)
+     .      .  213:       {
+     .      .  214:         fprintf(stderr,"Corrupted List: Error searching for inserted element\n");
+     .      .  215:         exit(2);
+     .      .  216:       }
+     .      .  217:       if(SortedList_delete(temp)==1)
+     .      .  218:       {
+     .      .  219:         fprintf(stderr,"Corrupted List: Error deleting inserted element \n");
+     .      .  220:         exit(2);
+     .      .  221:       }
+     .      .  222:     }
+     .      .  223:   }
+     .      .  224:   return (void *)threadTime;
+     .      .  225: }
+---
+     .      .  226: 
+     .      .  227: void changeString()
+     .      .  228: {
+     .      .  229:   strcat(listString,"list-");
+     .      .  230:   if(opt_yield)
