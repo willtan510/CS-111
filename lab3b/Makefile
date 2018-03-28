@@ -1,6 +1,6 @@
 #NAME: Jonathan Chon, William Tan
 #EMAIL: jonchon@gmail.com, willtan510@gmail.com
-#ID: 104780881, 104770108
+
 
 default:
 	@cp lab3b.py lab3b

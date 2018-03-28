@@ -1,6 +1,6 @@
 NAME: William Tan
 EMAIL: Willtan510@gmail.com
-ID: 104770108
+
 
 lab2_list.c
 The code that implements the parallel threads to be able to work concurrently on multiple sublists of a single list. 

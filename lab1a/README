@@ -1,6 +1,6 @@
 NAME: William Tan
 EMAIL: willtan510@gmail.com
-ID: 104770108
+
 
 lab1a.c
 This file contains the source code that forks a child process that runs a shell while the parent concurrently runs the terminal.

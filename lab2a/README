@@ -1,6 +1,6 @@
 NAME: William Tan
 EMAIL: willtan510@gmail.com
-ID: 104770108
+
 
 lab2_add.c
 Source code that implements an add function upon a shared variable with different command line options to specify synchronization methods and yielding.

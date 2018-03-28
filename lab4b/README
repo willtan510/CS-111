@@ -1,6 +1,5 @@
 NAME: William Tan
 EMAIL: Willtan510@gmail.com
-ID: 104770108
 
 lab4b.c
 Source file for the beaglebone and temperature sensor to be able to record and output the current temperature given different command-line options

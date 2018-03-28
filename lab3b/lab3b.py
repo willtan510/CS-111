@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #NAME: Jonathan Chon, William Tan
 #EMAIL: jonchon@gmail.com, willtan510@gmail.com
-#ID: 104780881, 104770108
+
 
 import sys
 import os
