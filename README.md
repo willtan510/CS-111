@@ -1,4 +1,4 @@
-# UCLA CS-Course-111 Operating Systems Principles taught by Peter Reigher, Fall 2017
+# UCLA CS-Course-111 Operating Systems Principles taught by Peter Reiher, Fall 2017
 
 These are my solutions to the projects assigned in this course, meant for educcational purposes only. Copying will be at your own risk.
 
