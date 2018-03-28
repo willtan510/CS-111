@@ -3,6 +3,7 @@
 These are my solutions to the projects assigned in this course, meant for educcational purposes only. Copying will be at your own risk.
 
 | Lab | Score |
+| -- | -- |
 | Lab0 | 98 |
 | Lab1a | 100 |
 | Lab1b | 100 |
